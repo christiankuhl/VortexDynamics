@@ -12,12 +12,13 @@ def __init__(self, a):
     """
     self.a = a
     self.xlim = (-a, a)
+    self.ylim = (-1, 1)
 
 def JGradG(self, z1, z2):
-    pass
+    return np.array([0, 0])
 
-def Jgradh(self, z):
-    pass
+def JGradh(self, z):
+    return np.array([0, 0])
 
 def plot_me(self, t):
-    pass
+    return np.array([self.a*math.cos(2*math.pi*t), math.sin(2*math.pi*t)])
