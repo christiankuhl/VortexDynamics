@@ -1,45 +1,76 @@
 import numpy as np
-from math import pi, sqrt
 from itertools import tee
 from scipy.integrate import odeint
+from utils import scatterList
+from domains import UnitDisk
 
-def JGradG(z1, z2):
-    x, y = z1
-    u, v = z2
-    xnorm = x**2 + y**2
-    if u == 0 and v == 0 and 0 < xnorm < 1:
-        return np.array([-y / (2 * pi * xnorm), x / (2 * pi * xnorm)])
-    else:
-        unorm = u**2 + v**2
-        prod = x * u + y * v
-        gx = (unorm - 1) * (unorm * x + (1 - 2 * v * y) * x + u * (-1 - x**2 + y**2))
-        gy = (unorm - 1) * (unorm * y + (1 - 2 * u * x) * y + v * (-1 + x**2 - y**2))
-        denominator = 2 * pi * (unorm + xnorm - 2 * prod) * (1 - 2 * prod + unorm * xnorm)
-        return np.array([gy, -gx])/denominator
+class NVortexProblem(object):
+    """
+    Represents the dynamics of the N-vortex problem in a given domain.
+    """
 
-def JGradh(z):
-    x, y = z
-    if x == 0 and y == 0:
-        return np.array([0, 0])
-    else:
-        xnorm = x**2 + y**2
-        return np.array([y / (pi * (xnorm - 1)), -x / (pi * (xnorm - 1))])
+    def __init__(self, domain=UnitDisk(), Tmax=10, eps=.01):
+        """
+        Initialise solver for the domain with maximal time Tmax and timestep eps.
+        """
+        self.domain = domain
+        self._Tmax = Tmax
+        self._eps = eps
+        self._N = int(self._Tmax / self._eps)
 
-def RHS(z, Gamma):
-    z = zip(*[iter(z)]*2)
-    z = list(enumerate(zip(z, Gamma)))
-    return np.array([Gamma_j * JGradh(z_j)  + 2 * sum(Gamma_i * JGradG(z_j, z_i)
-                                 for (i, (z_i, Gamma_i)) in z if i != j)
-                                 for (j, (z_j, Gamma_j)) in z]).flatten()
+    @property
+    def stepsize(self):
+        return self._eps
 
-def scatterList(z):
-    k = int(len(z)/2)
-    return [z[2*j] for j in range(k)], [z[2*j+1] for j in range(k)]
+    @stepsize.setter
+    def stepsize(self, value):
+        if value <= 0:
+            raise ValueError("Nonpositive stepsize is not allowed.")
+        else:
+            self._eps = value
+            self._N = int(self._Tmax / self._eps)
 
-def HamiltonianSolution(z0, Gamma, Tmax=10, eps=.01):
-    N = int(Tmax / eps)
-    t = [eps * tau for tau in range(N+1)]
-    f = lambda z, t: RHS(z, Gamma=Gamma)
-    sol = odeint(f, z0, t)
-    return [np.transpose(scatterList(s)) for s in sol]
-    
+    @property
+    def timesteps(self):
+        return self._N
+
+    @timesteps.setter
+    def timesteps(self, number):
+        if value <= 0:
+            raise ValueError("Nonpositive number of timesteps is not allowed.")
+        else:
+            self._N = int(number)
+            self._eps = int(self._Tmax / self._N)
+
+    @property
+    def Tmax(self):
+        return self._Tmax
+
+    @Tmax.setter
+    def Tmax(self, value):
+        if value <= 0:
+            raise ValueError("Nonpositive simulation time is not allowed.")
+        else:
+            self._Tmax = value
+            self._N = int(self._Tmax / self._eps)
+
+    def RHS(self, z, Gamma):
+        """
+        RHS(z, Gamma) represents the right hand side of the ODE we are interested in.
+        """
+        z = zip(*[iter(z)]*2)
+        z = list(enumerate(zip(z, Gamma)))
+        return np.array([Gamma_j * self.domain.JGradh(z_j)  + 2 *
+                                        sum(Gamma_i * self.domain.JGradG(z_j, z_i)
+                                            for (i, (z_i, Gamma_i)) in z if i != j)
+                                            for (j, (z_j, Gamma_j)) in z]).flatten()
+
+    def HamiltonianSolution(self, z0, Gamma):
+        """
+        This is our ODE solver. Solution data is a list of numpy arrays of the form
+        [[x1, ..., xn], [y1, ..., yn]] for each timestep.
+        """
+        t = [self.eps * tau for tau in range(self._N+1)]
+        f = lambda z, t: RHS(z, Gamma=Gamma)
+        sol = odeint(f, z0, t)
+        return [np.transpose(scatterList(s)) for s in sol]
