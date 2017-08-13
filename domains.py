@@ -61,3 +61,9 @@ class HalfPlane(Domain):
     This class implements the N-vortex dynamics for the half plane.
     """
     pass
+
+class Ellipse(Domain):
+    """
+    This class implements the N-vortex dynamics for the ellipse.
+    """
+    pass
