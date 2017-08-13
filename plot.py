@@ -36,6 +36,7 @@ class VortexPlot(object):
         self.ax = self.fig.add_axes([0, 0, 1, 1], frameon=False)
         self.ax.set_xlim(*domain.xlim), self.ax.set_xticks([])
         self.ax.set_ylim(*domain.ylim), self.ax.set_yticks([])
+        plt.axis('equal')
         boundary = scatterList(np.array([domain.plot_me(t) for t in
                                          np.array(range(1, 1000))*.001]).flatten())
         if boundary:

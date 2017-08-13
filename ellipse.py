@@ -8,7 +8,7 @@ import math
 
 def __init__(self, a):
     """
-    Instantiates an ellipse with half axes 1 and a.
+    Instantiates an ellipse with half axes a and 1.
     """
     self.a = a
     self.xlim = (-a, a)
