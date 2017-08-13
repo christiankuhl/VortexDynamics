@@ -70,7 +70,7 @@ class NVortexProblem(object):
         This is our ODE solver. Solution data is a list of numpy arrays of the form
         [[x1, ..., xn], [y1, ..., yn]] for each timestep.
         """
-        t = [self.eps * tau for tau in range(self._N+1)]
-        f = lambda z, t: RHS(z, Gamma=Gamma)
+        t = [self._eps * tau for tau in range(self._N+1)]
+        f = lambda z, t: self.RHS(z, Gamma=Gamma)
         sol = odeint(f, z0, t)
         return [np.transpose(scatterList(s)) for s in sol]

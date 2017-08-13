@@ -19,7 +19,7 @@ def star_configuration(r, Gamma, n, centralGamma=None):
 
 def scatterList(z):
     """
-    scatterList reshapes the solution vector z for easy 2d plotting.
+    scatterList reshapes the solution vector z of the N-vortex ODE for easy 2d plotting.
     """
     k = int(len(z)/2)
     return [z[2*j] for j in range(k)], [z[2*j+1] for j in range(k)]

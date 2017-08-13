@@ -24,9 +24,9 @@ class AbstractDomain(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def plot_me(self):
+    def plot_me(self, t):
         """
-        Should provide a matplotlib routine to plot the domain's boundary.
+        Should provide a parametrisation of the interval (0, 1) to the domain's boundary.
         """
 
 class Domain(AbstractDomain):
@@ -40,8 +40,24 @@ class Domain(AbstractDomain):
         for name, obj in module.__dict__.items():
             setattr(cls, name, obj)
 
+    def __init__(self, xlim=(-1, 1), ylim=(-1, 1)):
+        self.xlim = xlim
+        self.ylim = ylim
+
 class UnitDisk(Domain):
     """
     This class implements the N-vortex dynamics for the unit disk.
+    """
+    pass
+
+class Plane(Domain):
+    """
+    This class implements the N-vortex dynamics for the Euclidean plane.
+    """
+    pass
+
+class HalfPlane(Domain):
+    """
+    This class implements the N-vortex dynamics for the half plane.
     """
     pass

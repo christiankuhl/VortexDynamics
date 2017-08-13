@@ -37,5 +37,8 @@ def JGradh(self, z):
         xnorm = x**2 + y**2
         return np.array([y / (math.pi * (xnorm - 1)), -x / (math.pi * (xnorm - 1))])
 
-def plot_me(self):
-    pass
+def plot_me(self, t):
+    """
+    Provides a parametrisation of the domain's boundary on the interval [0, 1]
+    """
+    return np.array([math.cos(2*math.pi*t), math.sin(2*math.pi*t)])
