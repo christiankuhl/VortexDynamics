@@ -19,8 +19,8 @@ def __init__(self, a):
     self.xlim = (-a, a)
     self.ylim = (-1, 1)
     self._k = self.solve_for_k()
-    self._kprime = np.sqrt(1 - self._k**2)
     self._K = ellipk(self._k)
+    print(self._k)
 
 def JGradG(self, z1, z2):
     z1, z2 = complex(*z1), complex(*z2)
@@ -34,9 +34,9 @@ def JGradh(self, z):
     z = complex(*z)
     f, fprime, f2prime = self.F(z), self.Fprime(z), self.F2prime(z)
     # f, fprime, f2prime = z, 1, 0
-    hprime = 1.j / (2 * math.pi) * (2 * f * fprime / (1 - np.abs(f)**2)
+    jhprime = 1.j / (2 * math.pi) * (2 * f * fprime / (1 - np.abs(f)**2)
                                      + fprime * f2prime / (np.abs(fprime)**2))
-    return np.array([np.real(hprime), np.imag(hprime)])
+    return np.array([np.real(jhprime), np.imag(jhprime)])
 
 def plot_me(self, t):
     return np.array([self.a*math.cos(2*math.pi*t), math.sin(2*math.pi*t)])
@@ -65,22 +65,20 @@ def Fprime(self, z):
             * cn * dn)
 
 def F2prime(self, z):
-    cn, dn = self.cnW(z), self.dnW(z)
-    return ((z / (self.a**2 -1 - z**2) - 4 * self._K / (math.pi * np.sqrt(self.a**2 - 1 - z**2))
-            * dn) * self.Fprime(z) - 4 * np.sqrt(self._k) * (self._k + 1) * self._K**2
-            / (math.pi**2 * (self.a**2 - 1 - z**2)) * cn)
+    sn, cn, dn = self.snW(z), self.cnW(z), self.dnW(z)
+    return 2*np.sqrt(self._k)*self._K/(math.pi*(self.a**2-1-z**2)**(3/2))*cn*dn*z-4*np.sqrt(self._k)*self._K**2/(math.pi**2*(self.a**2-1-z**2))*sn*(dn**2+self._k*cn**2)
 
 @vectorized
 def sn(self, z):
-    return ellipfun('sn', z, self._k**2).__complex__()
+    return ellipfun('sn', z, self._k).__complex__()
 
 @vectorized
 def cn(self, z):
-    return ellipfun('cn', z, self._k**2).__complex__()
+    return ellipfun('cn', z, self._k).__complex__()
 
 @vectorized
 def dn(self, z):
-    return ellipfun('dn', z, self._k**2).__complex__()
+    return ellipfun('dn', z, self._k).__complex__()
 
 @vectorized
 def snW(self, z):
@@ -92,4 +90,4 @@ def cnW(self, z):
 
 @vectorized
 def dnW(self, z):
-    return self.cn(self.W(z))
+    return self.dn(self.W(z))

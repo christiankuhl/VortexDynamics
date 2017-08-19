@@ -23,8 +23,9 @@ class VortexPlot(object):
         """
         self.solution = self.problem.HamiltonianSolution(z0, Gamma)
         self.scat = self.ax.scatter(*scatterList(z0), c=Gamma)
+        framenumber = len(self.solution) - 1
         animation = FuncAnimation(self.fig, lambda n: self.scat.set_offsets(self.solution[n]),
-                                                                    interval=1, frames=1000)
+                                                                    interval=1, frames=framenumber)
         plt.show()
 
     def setup(self):
@@ -38,7 +39,7 @@ class VortexPlot(object):
         self.ax.set_ylim(*domain.ylim), self.ax.set_yticks([])
         plt.axis('equal')
         boundary = scatterList(np.array([domain.plot_me(t) for t in
-                                         np.array(range(1, 1000))*.001]).flatten())
+                                         np.arange(0.001, 1,.001)]).flatten())
         if boundary:
             self.ax.plot(*boundary, color="black")
 
