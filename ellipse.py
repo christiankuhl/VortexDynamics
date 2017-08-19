@@ -5,8 +5,11 @@ Insert code here as if it were inside a class definition statement.
 
 import numpy as np
 import math
-from scipy.special import ellipj, ellipk
+from scipy.special import ellipk
 from scipy.optimize import newton
+from mpmath import ellipfun
+from cmath import asin
+from utils import vectorized
 
 def __init__(self, a):
     """
@@ -20,15 +23,18 @@ def __init__(self, a):
     self._K = ellipk(self._k)
 
 def JGradG(self, z1, z2):
-    fz, fw, fprimez = self.F(z), self.F(w), self.Fprime(z)
-    igradG = 1.j / (2 * math.pi) * (fprimez * np.conj(fw) * (1 - fz * np.conj(fw))
+    z1, z2 = complex(*z1), complex(*z2)
+    fz, fw, fprimez = self.F(z1), self.F(z2), self.Fprime(z1)
+    igradG = -1.j / (2 * math.pi) * (fprimez * np.conj(fw) * (1 - fz * np.conj(fw))
                                     / np.abs((1 - fz * np.conj(fw)))**2
                                     - (fprimez * (fz - fw)) / np.abs((fz - fw))**2)
     return np.array([np.real(igradG), np.imag(igradG)])
 
 def JGradh(self, z):
+    z = complex(*z)
     f, fprime, f2prime = self.F(z), self.Fprime(z), self.F2prime(z)
-    hprime = -1.j / (2 * math.pi) * (2 * f * fprime / (1 - np.abs(f)**2)
+    # f, fprime, f2prime = z, 1, 0
+    hprime = 1.j / (2 * math.pi) * (2 * f * fprime / (1 - np.abs(f)**2)
                                      + fprime * f2prime / (np.abs(fprime)**2))
     return np.array([np.real(hprime), np.imag(hprime)])
 
@@ -41,31 +47,49 @@ def solve_for_k(self):
     def rhs(k):
         c = 2/math.pi * np.arcsinh(2 * self.a / (self.a**2 - 1))
         return ellipk(np.sqrt(1 - k**2)) / ellipk(k) - c
-    self._k = newton(rhs, .5)
+    return newton(rhs, .5)
 
+@vectorized
 def W(self, z):
-    return 2 * self._K / math.pi * np.arcsin(z / np.sqrt(a**2 - 1))
+    return 2 * self._K / math.pi * asin(z / np.sqrt(self.a**2 - 1))
+
+def h(self, z):
+    return 1/(2*math.pi)*np.log((1-np.abs(self.F(z))**2)/np.abs(self.Fprime(z)))
 
 def F(self, z):
-    return np.sqrt(self._k) * self.elliptic_functions(z)[0]
+    return np.sqrt(self._k) * self.snW(z)
 
 def Fprime(self, z):
-    _, cn, dn = self.elliptic_functions(z)
-    return (2 * np.sqrt(self._k) * self._K / (math.pi * np.sqrt(a**2 - 1 - z**2))
+    cn, dn = self.cnW(z), self.dnW(z)
+    return (2 * np.sqrt(self._k) * self._K / (math.pi * np.sqrt(self.a**2 - 1 - z**2))
             * cn * dn)
 
 def F2prime(self, z):
-    _, cn, dn = self.elliptic_functions(z)
-    return ((z / (a**2 -1 - z**2) - 4 * self._K / (math.pi * np.sqrt(a**2 - 1 - z**2))
+    cn, dn = self.cnW(z), self.dnW(z)
+    return ((z / (self.a**2 -1 - z**2) - 4 * self._K / (math.pi * np.sqrt(self.a**2 - 1 - z**2))
             * dn) * self.Fprime(z) - 4 * np.sqrt(self._k) * (self._k + 1) * self._K**2
-            / (math.pi**2 * (a**2 - 1 - z**2)) * cn)
+            / (math.pi**2 * (self.a**2 - 1 - z**2)) * cn)
 
-def elliptic_functions(self, z):
-    # ellipj does not, in its original form, take complex arguments
-    u, v = np.real(self.W(z)), np.imag(self.W(z))
-    snu, cnu, dnu, _ = ellipj(u, self._k)
-    snv, cnv, dnv, _ = ellipj(v, self._kprime)
-    sn = (snu * dnv + 1.j * cnu * dnu * snv * cnv) / (1 - snu**2 * dnv**2)
-    cn = (cnu * cnv - 1.j * snu * dnu * snv * dnv) / (1 - snu**2 * dnv**2)
-    dn = (dnu * cnv * dnv - 1.j * self._k**2 * snu * cnu * snv) / (1 - snu**2 * dnv**2)
-    return sn, cn, dn
+@vectorized
+def sn(self, z):
+    return ellipfun('sn', z, self._k**2).__complex__()
+
+@vectorized
+def cn(self, z):
+    return ellipfun('cn', z, self._k**2).__complex__()
+
+@vectorized
+def dn(self, z):
+    return ellipfun('dn', z, self._k**2).__complex__()
+
+@vectorized
+def snW(self, z):
+    return self.sn(self.W(z))
+
+@vectorized
+def cnW(self, z):
+    return self.cn(self.W(z))
+
+@vectorized
+def dnW(self, z):
+    return self.cn(self.W(z))

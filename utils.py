@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from functools import wraps
 
 def star_configuration(r, Gamma, n, centralGamma=None):
     """
@@ -23,3 +24,12 @@ def scatterList(z):
     """
     k = int(len(z)/2)
     return [z[2*j] for j in range(k)], [z[2*j+1] for j in range(k)]
+
+def vectorized(f):
+    @wraps(f)
+    def wrapper(self, *args, **kwargs):
+        def stripped_f(*args, **kwargs):
+            return f(self, *args, **kwargs)
+        ufunc = np.vectorize(stripped_f)
+        return ufunc(*args, **kwargs)
+    return wrapper
