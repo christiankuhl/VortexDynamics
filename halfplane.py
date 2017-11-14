@@ -4,7 +4,6 @@ Insert code here as if it were inside a class definition statement
 """
 
 import numpy as np
-import math
 
 def JGradG(self, z1, z2):
     """
@@ -14,8 +13,8 @@ def JGradG(self, z1, z2):
     """
     x, y = z1
     u, v = z2
-    norm2 = 2 * math.pi * (x - u)**2 + (y - v)**2
-    norm_ref2 = 2 * math.pi * (x - u)**2 + (y + v)**2
+    norm2 = 2 * np.pi * (x - u)**2 + (y - v)**2
+    norm_ref2 = 2 * np.pi * (x - u)**2 + (y + v)**2
     return np.array([y-v, u-x])/norm2 + np.array([y+v, u-x])/norm_ref2
 
 def JGradh(self, z):
@@ -24,10 +23,10 @@ def JGradh(self, z):
     of the Robin's function of the upper half plane.
     """
     x, y = z
-    return np.array([y, 0])/(4 * math.pi * y**2)
+    return np.array([y, 0])/(4 * np.pi * y**2)
 
 def plot_me(self, t):
     """
     Provides a parametrisation of the domain's boundary on the interval (0, 1)
     """
-    return np.array([math.tan(math.pi * (t - 1/2)), 0])
+    return np.array([np.tan(np.pi * (t - 1/2)), 0])

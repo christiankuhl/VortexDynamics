@@ -1,7 +1,7 @@
 import numpy as np
 from itertools import tee
 from scipy.integrate import odeint
-from utils import scatterList
+from utils import scatterList, symplectic
 from domains import UnitDisk
 
 class NVortexProblem(object):
@@ -70,7 +70,20 @@ class NVortexProblem(object):
         This is our ODE solver. Solution data is a list of numpy arrays of the form
         [[x1, ..., xn], [y1, ..., yn]] for each timestep.
         """
-        t = [self._eps * tau for tau in range(self._N+1)]
+        t = [self._eps * tau for tau in range(self._N + 1)]
         f = lambda z, t: self.RHS(z, Gamma=Gamma)
+        sol = odeint(f, z0, t)
+        return [np.transpose(scatterList(s)) for s in sol]
+
+
+    def GradientSolution(self, z0, Gamma):
+        """
+        This is our ODE solver for the corresponding gradient vector field.
+        Solution data is a list of numpy arrays of the form
+        [[x1, ..., xn], [y1, ..., yn]] for each timestep.
+        """
+        t = [self._eps * tau for tau in range(self._N + 1)]
+        J = np.array([[symplectic(i, j) for i in range(len(z0))] for j in range(len(z0))])
+        f = lambda z, t: self.RHS(z, Gamma=Gamma) @ J
         sol = odeint(f, z0, t)
         return [np.transpose(scatterList(s)) for s in sol]

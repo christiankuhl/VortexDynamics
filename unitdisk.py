@@ -4,7 +4,7 @@ Insert code here as if it were inside a class definition statement
 """
 
 import numpy as np
-import math
+from utils import vectorized
 
 def JGradG(self, z1, z2):
     """
@@ -16,13 +16,13 @@ def JGradG(self, z1, z2):
     u, v = z2
     xnorm = x**2 + y**2
     if u == 0 and v == 0 and 0 < xnorm < 1:
-        return np.array([-y / (2 * math.pi * xnorm), x / (2 * math.pi * xnorm)])
+        return np.array([-y / (2 * np.pi * xnorm), x / (2 * np.pi * xnorm)])
     else:
         unorm = u**2 + v**2
         prod = x * u + y * v
         gx = (unorm - 1) * (unorm * x + (1 - 2 * v * y) * x + u * (-1 - x**2 + y**2))
         gy = (unorm - 1) * (unorm * y + (1 - 2 * u * x) * y + v * (-1 + x**2 - y**2))
-        denominator = 2 * math.pi * (unorm + xnorm - 2 * prod) * (1 - 2 * prod + unorm * xnorm)
+        denominator = 2 * np.pi * (unorm + xnorm - 2 * prod) * (1 - 2 * prod + unorm * xnorm)
         return np.array([gy, -gx])/denominator
 
 def JGradh(self, z):
@@ -35,10 +35,14 @@ def JGradh(self, z):
         return np.array([0, 0])
     else:
         xnorm = x**2 + y**2
-        return np.array([y / (math.pi * (xnorm - 1)), -x / (math.pi * (xnorm - 1))])
+        return np.array([y / (np.pi * (xnorm - 1)), -x / (np.pi * (xnorm - 1))])
 
 def plot_me(self, t):
     """
     Provides a parametrisation of the domain's boundary on the interval [0, 1]
     """
-    return np.array([math.cos(2*math.pi*t), math.sin(2*math.pi*t)])
+    return np.array([np.cos(2*np.pi*t), np.sin(2*np.pi*t)])
+
+@vectorized
+def h(self, z):
+    return 1/(2*np.pi)*np.log(1-np.abs(z)**2)

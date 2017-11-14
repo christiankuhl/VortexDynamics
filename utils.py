@@ -33,3 +33,12 @@ def vectorized(f):
         ufunc = np.vectorize(stripped_f)
         return ufunc(*args, **kwargs)
     return wrapper
+
+def symplectic(i, j):
+    if i % 2 == 1:
+        if i == j + 1:
+            return 1
+    else:
+        if i == j - 1:
+            return -1
+    return 0
