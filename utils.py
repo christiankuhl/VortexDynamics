@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from functools import wraps
+from itertools import chain, combinations, tee
 
 def star_configuration(r, Gamma, n, centralGamma=None):
     """
@@ -48,3 +49,8 @@ def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
+
+def powerset(iterable):
+    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(2,len(s)+1))
