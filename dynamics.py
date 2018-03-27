@@ -83,7 +83,7 @@ class NVortexProblem(object):
         [[x1, ..., xn], [y1, ..., yn]] for each timestep.
         """
         t = [self._eps * tau for tau in range(self._N + 1)]
-        J = np.array([[symplectic(i, j) for i in range(len(z0))] for j in range(len(z0))])
+        J = np.array([[symplectic(i, j) * Gamma[int(i/2)] for i in range(len(z0))] for j in range(len(z0))])
         f = lambda z, t: self.RHS(z, Gamma=Gamma) @ J
         sol = odeint(f, z0, t)
         return [np.transpose(scatterList(s)) for s in sol]
