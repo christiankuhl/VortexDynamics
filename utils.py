@@ -3,7 +3,7 @@ import math
 from functools import wraps
 from itertools import chain, combinations, tee
 
-def star_configuration(r, Gamma, n, centralGamma=None):
+def star_configuration(r, Gamma, axes, centralGamma=None):
     """
     Returns a "star-shaped" configuration of vortices in the following way:
     The vortices with strength Gamma_i are placed on the x-axis, with distance
@@ -11,6 +11,7 @@ def star_configuration(r, Gamma, n, centralGamma=None):
     of a regular n-gon. If the parameter centralGamma is supplied, an additional
     vortex is placed at the origin with strength centralGamma.
     """
+    n = axes
     Gamma = np.array(list(Gamma)*n)
     x0 = np.array([[rho*math.cos(k*2*math.pi/n), rho*math.sin(k*2*math.pi/n)]
                                     for k in range(n) for rho in r]).flatten()
