@@ -55,3 +55,6 @@ def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(2,len(s)+1))
+
+def rotate(z, eps):
+    return np.array([z[j:j+2] @ [[math.cos(eps), -math.sin(eps)], [math.sin(eps), math.cos(eps)]] for j in range(0, len(z), 2)]).flatten()
